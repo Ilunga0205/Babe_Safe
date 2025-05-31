@@ -185,7 +185,7 @@ export default function Register({ navigation }) {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       
       <KeyboardAvoidingView
@@ -197,7 +197,7 @@ export default function Register({ navigation }) {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Header with back button */}
+          {/* Header with back button (compact) */}
           <Header
             title="Babysafe"
             onBackPress={() => navigation.goBack()}
@@ -223,54 +223,64 @@ export default function Register({ navigation }) {
             <Text style={styles.welcomeText}>Join Babysafe</Text>
             <Text style={styles.subtitle}>Create an account to ensure your baby's safety</Text>
 
-            {/* Form fields */}
-            <FormInput
-              icon="person"
-              placeholder="Full Name"
-              value={fullName}
-              onChangeText={setFullName}
-              error={errors.fullName}
-              autoCapitalize="words"
-            />
+            {/* Form fields with compact styling */}
+            <View style={styles.inputContainer}>
+              <FormInput
+                icon="person"
+                placeholder="Full Name"
+                value={fullName}
+                onChangeText={setFullName}
+                error={errors.fullName}
+                autoCapitalize="words"
+              />
+            </View>
 
-            <FormInput
-              icon="email"
-              placeholder="Email Address"
-              value={email}
-              onChangeText={setEmail}
-              error={errors.email}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
+            <View style={styles.inputContainer}>
+              <FormInput
+                icon="email"
+                placeholder="Email Address"
+                value={email}
+                onChangeText={setEmail}
+                error={errors.email}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
 
-            <FormInput
-              icon="lock"
-              placeholder="Password"
-              value={password}
-              onChangeText={setPassword}
-              error={errors.password}
-              secureTextEntry={secureTextEntry}
-              toggleSecureEntry={() => setSecureTextEntry(!secureTextEntry)}
-              autoCapitalize="none"
-            />
+            <View style={styles.inputContainer}>
+              <FormInput
+                icon="lock"
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                error={errors.password}
+                secureTextEntry={secureTextEntry}
+                toggleSecureEntry={() => setSecureTextEntry(!secureTextEntry)}
+                autoCapitalize="none"
+              />
+            </View>
 
-            <FormInput
-              icon="lock"
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              error={errors.confirmPassword}
-              secureTextEntry={confirmSecureTextEntry}
-              toggleSecureEntry={() => setConfirmSecureTextEntry(!confirmSecureTextEntry)}
-              autoCapitalize="none"
-            />
+            <View style={styles.inputContainer}>
+              <FormInput
+                icon="lock"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                error={errors.confirmPassword}
+                secureTextEntry={confirmSecureTextEntry}
+                toggleSecureEntry={() => setConfirmSecureTextEntry(!confirmSecureTextEntry)}
+                autoCapitalize="none"
+              />
+            </View>
 
             {/* Register button */}
-            <CustomButton
-              title="Create Account"
-              onPress={handleRegister}
-              loading={isLoading}
-            />
+            <View style={styles.buttonContainer}>
+              <CustomButton
+                title="Create Account"
+                onPress={handleRegister}
+                loading={isLoading}
+              />
+            </View>
 
             {/* Social login options */}
             <View style={styles.dividerContainer}>

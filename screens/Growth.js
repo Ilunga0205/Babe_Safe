@@ -169,7 +169,7 @@ export default function Growth({ route, navigation }) {
               <MaterialIcons name="arrow-back" size={24} color="#FFFFFF" />
             </TouchableOpacity>
             
-            <Text style={styles.logoText}>Growth</Text>
+            <Text style={styles.logoText}>Babysafe</Text>
             
             <View style={styles.headerButtons}>
               <TouchableOpacity style={styles.iconButton}>
@@ -178,15 +178,15 @@ export default function Growth({ route, navigation }) {
             </View>
           </View>
           
-          {/* Baby info section */}
-          <View style={styles.welcomeContainer}>
-            <Text style={styles.welcomeText}>
-              {baby?.name || 'Your Baby'}
-            </Text>
-            <Text style={styles.welcomeSubtext}>
-              {baby?.age || '6 months old'}
-            </Text>
-          </View>
+          {/* Baby info section - Updated */}
+<View style={styles.welcomeContainer}>
+  <Text style={styles.welcomeText}>
+    Growth Tracking
+  </Text>
+  <Text style={styles.welcomeSubtext}>
+    {baby?.name ? `Tracking ${baby.name}'s development` : 'Track your baby\'s development journey'}
+  </Text>
+</View>
           
           {/* Tab Navigation */}
           <View style={styles.tabContainer}>

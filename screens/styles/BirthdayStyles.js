@@ -49,7 +49,7 @@ export default StyleSheet.create({
     width: '100%',
     height: 56,
     backgroundColor: colors.white,
-    borderRadius: 12,
+    borderRadius: 20,
     paddingHorizontal: 16,
     marginBottom: 16,
     flexDirection: 'row',

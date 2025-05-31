@@ -13,8 +13,11 @@ import Birthday from './screens/Birthday'
 import Home from './screens/Home';
 import Vaccination from './screens/Vaccination'
 import Growth from './screens/Growth';
+import UserProfile from './screens/UserProfile'
 import BabyTimelineDetails from './screens/BabyTimelineDetails';
 import EntryDetailScreen from './screens/EntryDetailScreen';
+import Community from './screens/Community';
+import Notifications from './screens/Notifications';
 
 const Stack = createNativeStackNavigator();
 
@@ -22,7 +25,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <StatusBar style="dark" />
-      <Stack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false ,gestureEnabled: false }}>
         <Stack.Screen name="Welcome" component={Welcome} />
       
         <Stack.Screen name="Register" component={Register} />
@@ -31,11 +34,15 @@ export default function App() {
 
         <Stack.Screen name="Policies" component={Policies} />
         <Stack.Screen name="ForgotPassword" component={ForgotPassword}/>
+        <Stack.Screen name="UserProfile" component={UserProfile}/>
 
         <Stack.Screen name="Home" component={Home}/>
         <Stack.Screen name="Vaccination" component={Vaccination}/>
         <Stack.Screen name="Growth" component={Growth}/>
         <Stack.Screen name="EntryDetailScreen" component={EntryDetailScreen}/>
+
+        <Stack.Screen name="Community" component={Community}/>
+        <Stack.Screen name="Notifications" component={Notifications}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

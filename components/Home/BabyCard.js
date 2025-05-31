@@ -174,7 +174,7 @@ const BabyCard = ({ baby, onPress, onVaccinationPress }) => {
           </>
         ) : (
           <>
-            <Text style={styles.reminderText}>Add vaccination schedule</Text>
+            <Text style={styles.reminderText}>Schedule vaccines & visits</Text>
             <MaterialIcons name="add-circle-outline" size={20} color="#1976D2" />
           </>
         )}

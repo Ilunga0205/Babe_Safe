@@ -140,7 +140,7 @@ const HomeStyles = StyleSheet.create({
     backgroundColor: colors.secondary,
     paddingVertical: 8,
     paddingHorizontal: 16,
-    borderRadius: 30,
+    borderRadius: 20,
   },
   addButtonText: {
     color: '#623131',

@@ -18,36 +18,36 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom: 30,
+    paddingBottom: 15, // Reduced bottom padding
   },
   formContainer: {
     paddingHorizontal: 24,
-    paddingTop: 10,
+    paddingTop: 0, // Removed top padding
   },
   topImage: {
-    width: 120,
-    height: 120,
+    width: 80, // Reduced image size
+    height: 80, // Reduced image size
     alignSelf: 'center',
-    marginBottom: 20,
+    marginBottom: 10, // Reduced margin
   },
   welcomeText: {
-    fontSize: 28,
+    fontSize: 24, // Reduced font size
     fontWeight: '700',
     color: '#623131',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 4, // Reduced margin
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14, // Reduced font size
     color: colors.textGray,
     textAlign: 'center',
-    marginBottom: 30,
+    marginBottom: 15, // Reduced margin
   },
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 30,
-    marginBottom: 20,
+    marginTop: 15, // Reduced margin
+    marginBottom: 15, // Reduced margin
   },
   divider: {
     flex: 1,
@@ -57,7 +57,15 @@ const styles = StyleSheet.create({
   dividerText: {
     paddingHorizontal: 10,
     color: colors.textGray,
-    fontSize: 14,
+    fontSize: 13, // Reduced font size
+  },
+  // Add compact styling for input fields
+  inputContainer: {
+    marginBottom: 10, // Reduced margin between inputs
+  },
+  // Add compact styling for buttons
+  buttonContainer: {
+    marginTop: 10, // Reduced margin before button
   },
 });
 

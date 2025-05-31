@@ -19,6 +19,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { Audio } from 'expo-av'; 
 import colors from '../../constants/colors';
 
+
 const AddEntryModal = ({ visible, day, onClose, onSave, existingEntry }) => {
   // Form state
   const [entryData, setEntryData] = useState({

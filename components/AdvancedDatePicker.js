@@ -116,22 +116,32 @@ const AdvancedDatePicker = ({
   };
 
   // Handle day selection in calendar
-  const handleDayPress = (day) => {
-    if (day.isDisabled || !day.date) return;
-    
-    const newDate = new Date(day.date);
-    // Preserve time from current selection
-    if (tempDate) {
-      newDate.setHours(
-        tempDate.getHours(),
-        tempDate.getMinutes(),
-        tempDate.getSeconds()
-      );
+const handleDayPress = (day) => {
+  if (day.isDisabled || !day.date) return;
+  
+  const newDate = new Date(day.date);
+  // Preserve time from current selection
+  if (tempDate) {
+    newDate.setHours(
+      tempDate.getHours(),
+      tempDate.getMinutes(),
+      tempDate.getSeconds()
+    );
+  }
+  
+  setTempDate(newDate);
+  // Update the calendar with the new date selection
+  const updatedDays = calendarDays.map(calDay => {
+    if (calDay.date && isSameDay(calDay.date, day.date)) {
+      return { ...calDay, isSelected: true };
+    } else if (calDay.isSelected) {
+      return { ...calDay, isSelected: false };
     }
-    
-    setTempDate(newDate);
-    generateCalendarDays(viewDate); // Refresh to update selection
-  };
+    return calDay;
+  });
+  
+  setCalendarDays(updatedDays);
+}
 
   // Navigate to previous month
   const goToPreviousMonth = () => {
@@ -521,10 +531,10 @@ const styles = StyleSheet.create({
   },
   todayCell: {
     borderWidth: 1,
-    borderColor: '#6200EE',
+    borderColor: '##623131',
   },
   todayText: {
-    color: '#6200EE',
+    color: '#623131',
     fontWeight: '500',
   },
   selectedDayText: {

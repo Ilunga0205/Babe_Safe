@@ -20,7 +20,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import BabyCard from '../components/Home/BabyCard';
 import AddBabyModal from '../components/Home/AddBabyModal';
 import EmptyState from '../components/Home/EmptyState';
+import UserProfile from '../screens/UserProfile'; // Import UserProfile component
 import styles from './styles/HomeStyles';
+import Tips from '../screens/Tips';
+
 
 // Constants
 import colors from '../constants/colors';
@@ -35,6 +38,8 @@ export default function Home({ navigation, route }) {
   const [babies, setBabies] = useState([]);
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  // Add state for profile drawer visibility
+  const [isProfileVisible, setIsProfileVisible] = useState(false);
   
   // Get the initialTab from navigation params if available
   const initialTabFromParams = route.params?.initialTab;
@@ -71,11 +76,16 @@ export default function Home({ navigation, route }) {
     navigation.navigate('BabyDetails', { baby });
   };
 
-  // Handle user profile navigation
-  const navigateToProfile = () => {
-    navigation.navigate('UserProfile');
+  // Handle user profile navigation - Modified to open drawer instead of navigating
+  const toggleProfileDrawer = () => {
+    setIsProfileVisible(true);
   };
 
+  // Close profile drawer
+  const closeProfileDrawer = () => {
+    setIsProfileVisible(false);
+  };
+  
   // Take me to vaccination screen  
   const navigateToVaccinations = (baby) => {
     navigation.navigate('Vaccination', { baby });
@@ -122,7 +132,7 @@ export default function Home({ navigation, route }) {
                 <MaterialIcons name="notifications" size={24} color="#FFFFFF" />
                 <View style={styles.notificationBadge} />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.profileButton} onPress={navigateToProfile}>
+              <TouchableOpacity style={styles.profileButton} onPress={toggleProfileDrawer}>
                 <FontAwesome5 name="user-circle" size={24} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
@@ -139,122 +149,126 @@ export default function Home({ navigation, route }) {
           </View>
           
           {/* Tab Navigation */}
-          <View style={styles.tabContainer}>
-            {['babies', 'events', 'growth', 'tips'].map((tab) => {
-              const isActive = selectedTab === tab;
-              let icon;
-              let label;
-              
-              switch(tab) {
-                case 'babies':
-                  icon = <FontAwesome5 name="baby" size={16} color={isActive ? colors.primary : '#FFFFFF'} />;
-                  label = "My Babies";
-                  break;
-                case 'events':
-                  icon = <MaterialIcons name="event-note" size={16} color={isActive ? colors.primary : '#FFFFFF'} />;
-                  label = "Events";
-                  break;
-                case 'growth':
-                  icon = <MaterialIcons name="show-chart" size={16} color={isActive ? colors.primary : '#FFFFFF'} />;
-                  label = "Growth";
-                  break;
-                case 'tips':
-                  icon = <MaterialIcons name="lightbulb" size={16} color={isActive ? colors.primary : '#FFFFFF'} />;
-                  label = "Tips";
-                  break;
-                default:
-                  break;
-              }
-              
-              return (
-                <TouchableOpacity 
-                  key={tab}
-                  style={[styles.tab, isActive && styles.activeTab]}
-                  onPress={() => {
-                    setSelectedTab(tab);
-                    // Navigate to Growth screen when the growth tab is clicked
-                    if (tab === 'growth') {
-                      // Pass the first baby if available, otherwise null
-                      navigation.navigate('Growth', { baby: babies.length > 0 ? babies[0] : null });
-                    }
-                  }}
-                >
-                  {icon}
-                  <Text style={[styles.tabText, isActive && styles.activeTabText]}>
-                    {label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+<View style={styles.tabContainer}>
+  {['babies', 'events', 'growth', 'tips'].map((tab) => {
+    const isActive = selectedTab === tab;
+    let icon;
+    let label;
+    
+    switch(tab) {
+      case 'babies':
+        icon = <FontAwesome5 name="baby" size={16} color={isActive ? colors.primary : '#FFFFFF'} />;
+        label = "My Babies";
+        break;
+      case 'events':
+        icon = <MaterialIcons name="event-note" size={16} color={isActive ? colors.primary : '#FFFFFF'} />;
+        label = "Events";
+        break;
+      case 'growth':
+        icon = <MaterialIcons name="show-chart" size={16} color={isActive ? colors.primary : '#FFFFFF'} />;
+        label = "Growth";
+        break;
+      case 'tips':
+        icon = <MaterialIcons name="lightbulb" size={16} color={isActive ? colors.primary : '#FFFFFF'} />;
+        label = "Tips";
+        break;
+      default:
+        break;
+    }
+    
+    return (
+      <TouchableOpacity 
+        key={tab}
+        style={[styles.tab, isActive && styles.activeTab]}
+        onPress={() => {
+          setSelectedTab(tab);
+          // Navigate to specific screens based on tab selection
+          if (tab === 'growth') {
+            // Pass the first baby if available, otherwise null
+            navigation.navigate('Growth', { baby: babies.length > 0 ? babies[0] : null });
+          }
+          // No navigation for tips - we'll render it inline
+        }}
+      >
+        {icon}
+        <Text style={[styles.tabText, isActive && styles.activeTabText]}>
+          {label}
+        </Text>
+      </TouchableOpacity>
+    );
+  })}
+</View>
         </LinearGradient>
       </View>
       
       {/* Main content */}
       <View style={styles.contentContainer}>
-        {selectedTab === 'babies' && (
-          <>
-            {babies.length === 0 ? (
-              <EmptyState onAddBaby={() => setIsAddModalVisible(true)} />
-            ) : (
-              <>
-                <View style={styles.babyListHeader}>
-                  <Text style={styles.babyListTitle}>Your Babies</Text>
-                  <TouchableOpacity 
-                    style={styles.addButton}
-                    onPress={() => setIsAddModalVisible(true)}
-                  >
-                    <Text style={styles.addButtonText}>Add Baby</Text>
-                    <MaterialIcons name="add" size={18} color="#FFFFFF" />
-                  </TouchableOpacity>
-                </View>
+  {selectedTab === 'babies' && (
+    <>
+      {babies.length === 0 ? (
+        <EmptyState onAddBaby={() => setIsAddModalVisible(true)} />
+      ) : (
+        <>
+          <View style={styles.babyListHeader}>
+            <Text style={styles.babyListTitle}>Your Babies</Text>
+            <TouchableOpacity 
+              style={styles.addButton}
+              onPress={() => setIsAddModalVisible(true)}
+            >
+              <Text style={styles.addButtonText}>Add Baby</Text>
+              <MaterialIcons name="add" size={18} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
 
-                <FlatList
-                  data={babies}
-                  keyExtractor={(item) => item.id}
-                  renderItem={({ item }) => (
-                    <BabyCard 
-                      baby={item} 
-                      onPress={() => navigateToBabyDetails(item)}
-                      onVaccinationPress={navigateToVaccinations} 
-                    />
-                  )}
-                  contentContainerStyle={styles.babyList}
-                  showsVerticalScrollIndicator={false}
-                />
-              </>
+          <FlatList
+            data={babies}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <BabyCard 
+                baby={item} 
+                onPress={() => navigateToBabyDetails(item)}
+                onVaccinationPress={navigateToVaccinations} 
+              />
             )}
-          </>
-        )}
-        
-        {selectedTab === 'events' && (
-          <View style={styles.placeholderContainer}>
-            <MaterialIcons name="event-note" size={64} color={colors.textDark} />
-            <Text style={styles.placeholderText}>Events Calendar Coming Soon</Text>
-            <Text style={styles.placeholderSubtext}>
-              Keep track of vaccinations, doctor visits, and other important milestones
-            </Text>
-          </View>
-        )}
-        
-      
-        
-        {selectedTab === 'tips' && (
-          <View style={styles.placeholderContainer}>
-            <MaterialIcons name="lightbulb" size={64} color={colors.textDark} />
-            <Text style={styles.placeholderText}>Parenting Tips Coming Soon</Text>
-            <Text style={styles.placeholderSubtext}>
-              Get personalized advice and tips based on your baby's age and development
-            </Text>
-          </View>
-        )}
-      </View>
+            contentContainerStyle={styles.babyList}
+            showsVerticalScrollIndicator={false}
+          />
+        </>
+      )}
+    </>
+  )}
+  
+  {selectedTab === 'events' && (
+    <View style={styles.placeholderContainer}>
+      <MaterialIcons name="event-note" size={64} color={colors.textDark} />
+      <Text style={styles.placeholderText}>Events Calendar Coming Soon</Text>
+      <Text style={styles.placeholderSubtext}>
+        Keep track of vaccinations, doctor visits, and other important milestones
+      </Text>
+    </View>
+  )}
+  
+  {selectedTab === 'tips' && (
+    <Tips 
+      navigation={navigation} 
+      route={route}
+      babies={babies} // Pass babies array to Tips component
+    />
+  )}
+</View>
 
       {/* Add baby modal */}
       <AddBabyModal
         visible={isAddModalVisible}
         onClose={() => setIsAddModalVisible(false)}
         onAddBaby={handleAddBaby}
+      />
+
+      {/* User Profile Drawer */}
+      <UserProfile
+        navigation={navigation}
+        visible={isProfileVisible}
+        onClose={closeProfileDrawer}
       />
     </View>
   );
