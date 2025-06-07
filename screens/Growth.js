@@ -23,15 +23,18 @@ import colors from '../constants/colors';
 // Components
 import BabyTimeline from '../components/Growth/BabyTimeline';
 import AddEntryModal from '../components/Growth/AddEntryModal';
+import Milestones from './Milestones';
+import DailyRoutine from './DailyRoutine'; 
 
 export default function Growth({ route, navigation }) {
   const { baby } = route.params || { baby: null };
   const insets = useSafeAreaInsets();
   
   // State
-  const [activeTab, setActiveTab] = useState('journal'); // 'chart', 'journal', 'milestones'
+  const [activeTab, setActiveTab] = useState('journal'); // 'chart', 'journal', 'milestones', 'routine'
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [journalEntries, setJournalEntries] = useState({}); // Object with date keys
+  const [routineData, setRoutineData] = useState({}); // New state for routine data
   const [loading, setLoading] = useState(false);
   const [selectedDay, setSelectedDay] = useState(null);
   const [isAddEntryVisible, setIsAddEntryVisible] = useState(false);
@@ -50,6 +53,7 @@ export default function Growth({ route, navigation }) {
       setTimeout(() => {
         // Generate some mock journal entries for demonstration
         const mockEntries = {};
+        const mockRoutineData = {};
         const today = new Date();
         
         // Create entries for random days in current month
@@ -66,18 +70,82 @@ export default function Growth({ route, navigation }) {
               height: 50 + Math.random() * 30, // 50-80cm
               headCircumference: 35 + Math.random() * 10 // 35-45cm
             } : null,
-            milestones: Math.random() > 0.7 ? ['First smile', 'Rolled over'] : [],
+            milestones: Math.random() > 0.7 ? ['First smile', 'Rolled over', 'Holds head up'] : [],
             mediaItems: [],
             notes: Math.random() > 0.5 ? 'Baby was very active today!' : '',
             mood: ['happy', 'sleepy', 'fussy'][Math.floor(Math.random() * 3)]
           };
+
+          // Generate mock routine data
+          mockRoutineData[dateStr] = generateMockRoutineData(dateStr);
         }
         
         setJournalEntries(mockEntries);
+        setRoutineData(mockRoutineData);
         setLoading(false);
       }, 1000);
     }
   }, [baby]);
+
+  // Generate mock routine data for demonstration
+  const generateMockRoutineData = (dateStr) => {
+    const feedingTimes = [];
+    const sleepSessions = [];
+    const diaperChanges = [];
+    
+    // Generate 6-8 feeding sessions throughout the day
+    for (let i = 0; i < 7; i++) {
+      const hour = Math.floor(Math.random() * 24);
+      const minute = Math.floor(Math.random() * 60);
+      feedingTimes.push({
+        id: `feed_${dateStr}_${i}`,
+        time: `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
+        type: Math.random() > 0.5 ? 'breast' : 'bottle',
+        duration: Math.floor(Math.random() * 30) + 10, // 10-40 minutes
+        amount: Math.random() > 0.5 ? Math.floor(Math.random() * 150) + 50 : null, // 50-200ml for bottle
+        notes: Math.random() > 0.7 ? 'Good feeding session' : ''
+      });
+    }
+
+    // Generate 3-5 sleep sessions
+    for (let i = 0; i < 4; i++) {
+      const startHour = Math.floor(Math.random() * 24);
+      const startMinute = Math.floor(Math.random() * 60);
+      const duration = Math.floor(Math.random() * 180) + 30; // 30-210 minutes
+      sleepSessions.push({
+        id: `sleep_${dateStr}_${i}`,
+        startTime: `${startHour.toString().padStart(2, '0')}:${startMinute.toString().padStart(2, '0')}`,
+        duration: duration,
+        quality: ['excellent', 'good', 'fair', 'poor'][Math.floor(Math.random() * 4)],
+        location: Math.random() > 0.5 ? 'crib' : 'bassinet',
+        notes: Math.random() > 0.8 ? 'Slept peacefully' : ''
+      });
+    }
+
+    // Generate 8-12 diaper changes
+    for (let i = 0; i < 10; i++) {
+      const hour = Math.floor(Math.random() * 24);
+      const minute = Math.floor(Math.random() * 60);
+      const hasWet = Math.random() > 0.2; // 80% chance of wet
+      const hasSoiled = Math.random() > 0.6; // 40% chance of soiled
+      
+      diaperChanges.push({
+        id: `diaper_${dateStr}_${i}`,
+        time: `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
+        type: hasWet && hasSoiled ? 'both' : hasWet ? 'wet' : 'soiled',
+        consistency: hasSoiled ? ['soft', 'firm', 'loose', 'hard'][Math.floor(Math.random() * 4)] : null,
+        color: hasSoiled ? ['yellow', 'brown', 'green'][Math.floor(Math.random() * 3)] : null,
+        notes: Math.random() > 0.9 ? 'Unusual color/consistency' : ''
+      });
+    }
+
+    return {
+      date: dateStr,
+      feeding: feedingTimes.sort((a, b) => a.time.localeCompare(b.time)),
+      sleep: sleepSessions.sort((a, b) => a.startTime.localeCompare(b.startTime)),
+      diapers: diaperChanges.sort((a, b) => a.time.localeCompare(b.time))
+    };
+  };
 
   // Helper to generate random entry types for mock data
   const getRandomEntryTypes = () => {
@@ -121,6 +189,93 @@ export default function Growth({ route, navigation }) {
     setJournalEntries(updatedEntries);
     setIsAddEntryVisible(false);
     setSelectedDay(null);
+  };
+
+  // Handle routine data updates
+  const handleRoutineUpdate = (dateStr, updatedData) => {
+    const updatedRoutineData = { ...routineData };
+    updatedRoutineData[dateStr] = updatedData;
+    setRoutineData(updatedRoutineData);
+  };
+
+  // Handle milestone updates from Milestones component
+  const handleMilestoneUpdate = (milestoneId, achievementData) => {
+    if (!achievementData) return; // Milestone was removed
+    
+    // Add milestone to journal entry for the achievement date
+    const dateStr = achievementData.date;
+    const updatedEntries = { ...journalEntries };
+    
+    if (!updatedEntries[dateStr]) {
+      updatedEntries[dateStr] = {
+        date: dateStr,
+        entryTypes: ['milestone'],
+        growthData: null,
+        milestones: [],
+        mediaItems: [],
+        notes: achievementData.notes || '',
+        mood: 'happy'
+      };
+    }
+    
+    // Add milestone to the entry if not already present
+    const milestoneTitle = getMilestoneTitleById(milestoneId);
+    if (milestoneTitle && !updatedEntries[dateStr].milestones.includes(milestoneTitle)) {
+      updatedEntries[dateStr].milestones.push(milestoneTitle);
+      
+      // Add milestone to entry types if not present
+      if (!updatedEntries[dateStr].entryTypes.includes('milestone')) {
+        updatedEntries[dateStr].entryTypes.push('milestone');
+      }
+      
+      // Update notes with milestone achievement note
+      if (achievementData.notes) {
+        const existingNotes = updatedEntries[dateStr].notes || '';
+        const milestoneNote = `${milestoneTitle}: ${achievementData.notes}`;
+        updatedEntries[dateStr].notes = existingNotes 
+          ? `${existingNotes}\n${milestoneNote}`
+          : milestoneNote;
+      }
+    }
+    
+    setJournalEntries(updatedEntries);
+  };
+
+  // Helper function to get milestone title by ID (you would implement this based on your milestone data structure)
+  const getMilestoneTitleById = (milestoneId) => {
+    // This is a simplified mapping - in a real app, you'd have a proper data structure
+    const milestoneMap = {
+      'm1': 'Holds head up',
+      'm2': 'Rolls over',
+      'm3': 'Sits without support',
+      'm4': 'Crawls',
+      'm5': 'Pulls to stand',
+      'm6': 'First steps',
+      'm7': 'Walks steadily',
+      'l1': 'First smile',
+      'l2': 'Coos and gurgles',
+      'l3': 'Babbles',
+      'l4': 'Says "mama" or "dada"',
+      'l5': 'First words',
+      'l6': 'Follows simple commands',
+      'l7': 'Says 10+ words',
+      'c1': 'Recognizes familiar faces',
+      'c2': 'Shows stranger anxiety',
+      'c3': 'Plays peek-a-boo',
+      'c4': 'Object permanence',
+      'c5': 'Imitates actions',
+      'c6': 'Points to objects',
+      'c7': 'Pretend play',
+      'f1': 'Breastfeeding/bottle feeding',
+      'f2': 'Shows hunger cues',
+      'f3': 'Ready for solids',
+      'f4': 'Self-feeding with hands',
+      'f5': 'Uses sippy cup',
+      'f6': 'Uses spoon',
+      'f7': 'Eats variety of foods',
+    };
+    
+    return milestoneMap[milestoneId] || 'Unknown milestone';
   };
 
   // Render month name and navigation
@@ -179,53 +334,62 @@ export default function Growth({ route, navigation }) {
           </View>
           
           {/* Baby info section - Updated */}
-<View style={styles.welcomeContainer}>
-  <Text style={styles.welcomeText}>
-    Growth Tracking
-  </Text>
-  <Text style={styles.welcomeSubtext}>
-    {baby?.name ? `Tracking ${baby.name}'s development` : 'Track your baby\'s development journey'}
-  </Text>
-</View>
-          
-          {/* Tab Navigation */}
-          <View style={styles.tabContainer}>
-            {['chart', 'journal', 'milestones'].map((tab) => {
-              const isActive = activeTab === tab;
-              let icon;
-              let label;
-              
-              switch(tab) {
-                case 'chart':
-                  icon = <MaterialIcons name="bar-chart" size={16} color={isActive ? colors.primary : '#FFFFFF'} />;
-                  label = "Growth Charts";
-                  break;
-                case 'journal':
-                  icon = <MaterialIcons name="calendar-today" size={16} color={isActive ? colors.primary : '#FFFFFF'} />;
-                  label = "BabyDays";
-                  break;
-                case 'milestones':
-                  icon = <MaterialIcons name="emoji-events" size={16} color={isActive ? colors.primary : '#FFFFFF'} />;
-                  label = "Milestones";
-                  break;
-                default:
-                  break;
-              }
-              
-              return (
-                <TouchableOpacity 
-                  key={tab}
-                  style={[styles.tab, isActive && styles.activeTab]}
-                  onPress={() => setActiveTab(tab)}
-                >
-                  {icon}
-                  <Text style={[styles.tabText, isActive && styles.activeTabText]}>
-                    {label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+          <View style={styles.welcomeContainer}>
+            <Text style={styles.welcomeText}>
+              Growth Tracking
+            </Text>
+            <Text style={styles.welcomeSubtext}>
+              {baby?.name ? `Tracking ${baby.name}'s development` : 'Track your baby\'s development journey'}
+            </Text>
           </View>
+          
+          {/* Tab Navigation - Updated with routine tab */}
+          <View style={styles.tabContainer}>
+  {['chart', 'journal', 'milestones', 'routine'].map((tab) => {
+    const isActive = activeTab === tab;
+    let icon;
+    let label;
+    
+    switch(tab) {
+      case 'chart':
+        icon = <MaterialIcons name="bar-chart" size={14} color={isActive ? colors.primary : '#FFFFFF'} />;
+        label = "Charts"; // Shortened from "Growth Charts"
+        break;
+      case 'journal':
+        icon = <MaterialIcons name="calendar-today" size={14} color={isActive ? colors.primary : '#FFFFFF'} />;
+        label = "Journal"; // Shortened from "BabyDays"
+        break;
+      case 'milestones':
+        icon = <MaterialIcons name="emoji-events" size={14} color={isActive ? colors.primary : '#FFFFFF'} />;
+        label = "Milestones";
+        break;
+      case 'routine':
+        icon = <MaterialIcons name="schedule" size={14} color={isActive ? colors.primary : '#FFFFFF'} />;
+        label = "Routine"; // Shortened from "Daily Routine"
+        break;
+      default:
+        break;
+    }
+    
+    return (
+      <TouchableOpacity 
+        key={tab}
+        style={[styles.tab, isActive && styles.activeTab]}
+        onPress={() => setActiveTab(tab)}
+      >
+        {icon}
+        <Text 
+          style={[styles.tabText, isActive && styles.activeTabText]}
+          numberOfLines={1}
+          adjustsFontSizeToFit={true}
+          minimumFontScale={0.8}
+        >
+          {label}
+        </Text>
+      </TouchableOpacity>
+    );
+  })}
+</View>
         </LinearGradient>
       </View>
       
@@ -238,13 +402,12 @@ export default function Growth({ route, navigation }) {
               <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
             ) : (
               <BabyTimeline
-              month={currentMonth}
-              journalEntries={journalEntries}
-              onDayPress={handleDayPress}
-              onAddEntry={handleDayPress}
-              colors={colors}
-            />
-            
+                month={currentMonth}
+                journalEntries={journalEntries}
+                onDayPress={handleDayPress}
+                onAddEntry={handleDayPress}
+                colors={colors}
+              />
             )}
           </>
         )}
@@ -265,18 +428,21 @@ export default function Growth({ route, navigation }) {
         )}
         
         {activeTab === 'milestones' && (
-          <ScrollView style={styles.tabContent} contentContainerStyle={styles.tabContentContainer}>
-            <View style={styles.milestonesContainer}>
-              <Text style={styles.sectionTitle}>Development Milestones</Text>
-              <Text style={styles.comingSoonText}>Track your baby's development journey!</Text>
-              
-              {/* Milestone timeline would go here */}
-              <View style={styles.milestonePlaceholder}>
-                <MaterialIcons name="emoji-events" size={64} color={colors.textDark} />
-                <Text style={styles.placeholderText}>Milestone tracking coming soon!</Text>
-              </View>
-            </View>
-          </ScrollView>
+          <Milestones
+            baby={baby}
+            journalEntries={journalEntries}
+            onMilestoneUpdate={handleMilestoneUpdate}
+          />
+        )}
+
+        {activeTab === 'routine' && (
+          <DailyRoutine
+            baby={baby}
+            routineData={routineData}
+            onRoutineUpdate={handleRoutineUpdate}
+            currentMonth={currentMonth}
+            onMonthChange={setCurrentMonth}
+          />
         )}
       </View>
       

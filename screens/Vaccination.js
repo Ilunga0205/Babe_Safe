@@ -10,7 +10,6 @@ import {
   Dimensions,
   Platform,
 } from 'react-native';
-import { Calendar } from 'react-native-calendars';
 import { MaterialIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -18,7 +17,10 @@ import colors from '../constants/colors';
 import AdvancedDatePicker from '../components/AdvancedDatePicker';
 import VaccineModal from '../components/Vaccination/VaccineModal';
 import VisitsModal from '../components/Vaccination/VisitsModal';
+import VaccinationCalendar from '../components/Vaccination/VaccinationCalendar';
+import VaccCompleted from './VaccCompleted'; // Import your completed component
 
+// Get device width for responsive design
 const { width } = Dimensions.get('window');
 
 const Vaccination = ({ route, navigation }) => {
@@ -28,7 +30,7 @@ const Vaccination = ({ route, navigation }) => {
   // State for vaccinations
   const [vaccinations, setVaccinations] = useState(baby.vaccinations || []);
   
-  // State for visits - ADD THIS
+  // State for visits
   const [visits, setVisits] = useState(baby.visits || []);
   
   const [showVaccineModal, setShowVaccineModal] = useState(false);
@@ -36,6 +38,8 @@ const Vaccination = ({ route, navigation }) => {
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedDateObj, setSelectedDateObj] = useState(new Date());
   const [markedDates, setMarkedDates] = useState({});
+  const [calendarExpanded, setCalendarExpanded] = useState(false);
+
   
   // State for active tab
   const [activeTab, setActiveTab] = useState('upcoming');
@@ -52,7 +56,7 @@ const Vaccination = ({ route, navigation }) => {
     });
   }, [navigation]);
   
-  // Update marked dates whenever vaccinations or visits change - UPDATED
+  // Update marked dates whenever vaccinations or visits change
   useEffect(() => {
     const newMarkedDates = {};
     
@@ -87,7 +91,7 @@ const Vaccination = ({ route, navigation }) => {
     });
     
     setMarkedDates(newMarkedDates);
-  }, [vaccinations, visits]); // Add visits to dependency array
+  }, [vaccinations, visits]);
 
   // Initialize selectedDate with current date in proper format
   useEffect(() => {
@@ -160,7 +164,7 @@ const Vaccination = ({ route, navigation }) => {
     // In a real app, you would save to database/storage here
   };
   
-  // Add new visit handler - ADD THIS
+  // Add new visit handler
   const handleAddVisit = (newVisit) => {
     const updatedVisits = [...visits, newVisit];
     setVisits(updatedVisits);
@@ -169,12 +173,11 @@ const Vaccination = ({ route, navigation }) => {
   
   // Delete vaccination handler
   const handleDeleteVaccination = (id) => {
-    // Delete vaccination logic...
     const updatedVaccinations = vaccinations.filter(v => v.id !== id);
     setVaccinations(updatedVaccinations);
   };
   
-  // Delete visit handler - ADD THIS
+  // Delete visit handler
   const handleDeleteVisit = (id) => {
     const updatedVisits = visits.filter(v => v.id !== id);
     setVisits(updatedVisits);
@@ -190,7 +193,7 @@ const Vaccination = ({ route, navigation }) => {
     });
   };
   
-  // Format date and time - ADD THIS
+  // Format date and time
   const formatDateTime = (dateTimeString) => {
     const date = new Date(dateTimeString);
     return {
@@ -228,7 +231,7 @@ const Vaccination = ({ route, navigation }) => {
     return new Date(a.date) - new Date(b.date);
   });
   
-  // Sort visits by date - ADD THIS
+  // Sort visits by date
   const sortedVisits = [...visits].sort((a, b) => {
     return new Date(a.dateTime) - new Date(b.dateTime);
   });
@@ -237,7 +240,7 @@ const Vaccination = ({ route, navigation }) => {
   const upcomingVaccinations = sortedVaccinations.filter(v => !isPastDate(v.date));
   const pastVaccinations = sortedVaccinations.filter(v => isPastDate(v.date));
   
-  // Group visits by upcoming and past - ADD THIS
+  // Group visits by upcoming and past
   const upcomingVisits = sortedVisits.filter(v => !isPastDate(v.dateTime));
   const pastVisits = sortedVisits.filter(v => isPastDate(v.dateTime));
   
@@ -308,7 +311,7 @@ const Vaccination = ({ route, navigation }) => {
               ))
             )}
 
-            {/* Upcoming Visits - ADD THIS SECTION */}
+            {/* Upcoming Visits */}
             <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Upcoming Doctor Visits</Text>
             
             {upcomingVisits.length === 0 ? (
@@ -359,99 +362,15 @@ const Vaccination = ({ route, navigation }) => {
           </View>
         );
       
-      case 'past':
+      case 'completed':
+        // Render the VaccCompleted component directly
         return (
-          <View style={styles.sectionContainer}>
-            {/* Past Vaccinations */}
-            <Text style={styles.sectionTitle}>Completed Vaccinations</Text>
-            
-            {pastVaccinations.length === 0 ? (
-              <View style={styles.emptyState}>
-                <FontAwesome5 name="check-circle" size={24} color={colors.textLight} />
-                <Text style={styles.emptyStateText}>No completed vaccinations</Text>
-              </View>
-            ) : (
-              pastVaccinations.map(vaccination => (
-                <View key={vaccination.id} style={[styles.vaccinationCard, styles.pastVaccinationCard]}>
-                  <View style={styles.vaccinationHeader}>
-                    <View style={[styles.vaccinationIconContainer, styles.pastVaccinationIcon]}>
-                      <FontAwesome5 name="check" size={14} color="#FFFFFF" />
-                    </View>
-                    <View style={styles.vaccinationHeaderContent}>
-                      <Text style={styles.vaccinationName}>{vaccination.name}</Text>
-                      <View style={styles.dateContainer}>
-                        <MaterialIcons name="event" size={14} color={colors.textGray} />
-                        <Text style={styles.dateText}>{formatDate(vaccination.date)}</Text>
-                        <View style={styles.completedBadge}>
-                          <Text style={styles.completedText}>COMPLETED</Text>
-                        </View>
-                      </View>
-                    </View>
-                    <TouchableOpacity 
-                      style={styles.deleteButton}
-                      onPress={() => handleDeleteVaccination(vaccination.id)}
-                      hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
-                    >
-                      <MaterialIcons name="close" size={20} color={colors.textLight} />
-                    </TouchableOpacity>
-                  </View>
-                  
-                  {vaccination.notes && (
-                    <View style={styles.notesContainer}>
-                      <Text style={styles.notesText}>{vaccination.notes}</Text>
-                    </View>
-                  )}
-                </View>
-              ))
-            )}
-
-            {/* Past Visits - ADD THIS SECTION */}
-            <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Past Doctor Visits</Text>
-            
-            {pastVisits.length === 0 ? (
-              <View style={styles.emptyState}>
-                <FontAwesome5 name="hospital" size={24} color={colors.textLight} />
-                <Text style={styles.emptyStateText}>No past doctor visits</Text>
-              </View>
-            ) : (
-              pastVisits.map(visit => {
-                const { date, time } = formatDateTime(visit.dateTime);
-                return (
-                  <View key={visit.id} style={[styles.vaccinationCard, styles.pastVaccinationCard]}>
-                    <View style={styles.vaccinationHeader}>
-                      <View style={[styles.vaccinationIconContainer, { backgroundColor: colors.success }]}>
-                        <FontAwesome5 name="check" size={14} color="#FFFFFF" />
-                      </View>
-                      <View style={styles.vaccinationHeaderContent}>
-                        <Text style={styles.vaccinationName}>{visit.doctorName}</Text>
-                        <Text style={[styles.vaccinationName, { fontSize: 14, fontWeight: '500', color: colors.textGray }]}>{visit.type}</Text>
-                        <View style={styles.dateContainer}>
-                          <MaterialIcons name="event" size={14} color={colors.textGray} />
-                          <Text style={styles.dateText}>{date} at {time}</Text>
-                          <View style={styles.completedBadge}>
-                            <Text style={styles.completedText}>COMPLETED</Text>
-                          </View>
-                        </View>
-                      </View>
-                      <TouchableOpacity 
-                        style={styles.deleteButton}
-                        onPress={() => handleDeleteVisit(visit.id)}
-                        hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
-                      >
-                        <MaterialIcons name="close" size={20} color={colors.textLight} />
-                      </TouchableOpacity>
-                    </View>
-                    
-                    {visit.notes && (
-                      <View style={styles.notesContainer}>
-                        <Text style={styles.notesText}>{visit.notes}</Text>
-                      </View>
-                    )}
-                  </View>
-                );
-              })
-            )}
-          </View>
+          <VaccCompleted 
+            pastVaccinations={pastVaccinations}
+            pastVisits={pastVisits}
+            onDeleteVaccination={handleDeleteVaccination}
+            onDeleteVisit={handleDeleteVisit}
+          />
         );
       
       case 'schedule':
@@ -494,6 +413,9 @@ const Vaccination = ({ route, navigation }) => {
             ))}
           </View>
         );
+      
+      default:
+        return null;
     }
   };
 
@@ -506,10 +428,10 @@ const Vaccination = ({ route, navigation }) => {
         translucent={true}
       />
       
-      {/* Custom Header - Updated to match Home screen */}
+      {/* Custom Header */}
       <View style={[styles.headerContainer, { paddingTop: headerTopPadding }]}>
         <LinearGradient
-          colors={['#7a3e3e', colors.primary]} // Darker shade of primary for gradient
+          colors={['#7a3e3e', colors.primary]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.headerGradient}
@@ -546,7 +468,7 @@ const Vaccination = ({ route, navigation }) => {
           <View style={styles.tabContainer}>
             {[
               { id: 'upcoming', icon: 'syringe', label: 'Upcoming', iconType: 'fontAwesome5' },
-              { id: 'past', icon: 'check-circle', label: 'Completed', iconType: 'material' },
+              { id: 'completed', icon: 'check-circle', label: 'Completed', iconType: 'material' },
               { id: 'schedule', icon: 'event-note', label: 'Schedule', iconType: 'material' }
             ].map((tab) => {
               const isActive = tab.id === activeTab;
@@ -584,31 +506,33 @@ const Vaccination = ({ route, navigation }) => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Calendar - Show only in Upcoming and Past tabs */}
-        {activeTab !== 'schedule' && (
-          <View style={styles.calendarContainer}>
-            <Calendar
-              markedDates={markedDates}
-              onDayPress={handleDayPress}
-              theme={{
-                backgroundColor: '#FFFFFF',
-                calendarBackground: '#FFFFFF',
-                textSectionTitleColor: colors.textDark,
-                selectedDayBackgroundColor: colors.primary,
-                selectedDayTextColor: '#FFFFFF',
-                todayTextColor: colors.primary,
-                dayTextColor: colors.textDark,
-                textDisabledColor: colors.textLight,
-                dotColor: colors.primary,
-                selectedDotColor: '#FFFFFF',
-                arrowColor: colors.primary,
-                monthTextColor: colors.textDark,
-                indicatorColor: colors.primary,
-                textDayFontWeight: '300',
-                textMonthFontWeight: '600',
-                textDayHeaderFontWeight: '500',
-              }}
-            />
+        {/* Calendar - Show only in Upcoming tab */}
+        {activeTab === 'upcoming' && (
+          <View style={styles.calendarSection}>
+            <TouchableOpacity 
+              style={styles.calendarToggle}
+              onPress={() => setCalendarExpanded(!calendarExpanded)}
+            >
+              <View style={styles.calendarToggleContent}>
+                <MaterialIcons name="calendar-today" size={20} color={colors.primary} />
+                <Text style={styles.calendarToggleText}>
+                  {calendarExpanded ? 'Hide Calendar' : 'Show Calendar'}
+                </Text>
+                <MaterialIcons 
+                  name={calendarExpanded ? "keyboard-arrow-up" : "keyboard-arrow-down"} 
+                  size={24} 
+                  color={colors.primary} 
+                />
+              </View>
+            </TouchableOpacity>
+            
+            {calendarExpanded && (
+              <VaccinationCalendar
+                markedDates={markedDates}
+                onDayPress={handleDayPress}
+                selectedDate={selectedDate}
+              />
+            )}
           </View>
         )}
         
@@ -628,84 +552,86 @@ const Vaccination = ({ route, navigation }) => {
         />
       )}
       
-      {/* Floating action button with menu */}
-      <View style={styles.fabContainer}>
-        {/* Vaccination option */}
-        <Animated.View 
-          style={[
-            styles.fabOption,
-            { 
-              transform: [
-                { translateY: vaccinationTranslateY },
-                { scale: addButtonAnimation }
-              ] 
-            }
-          ]}
-        >
-          <TouchableOpacity 
-            style={[styles.fabOptionButton, { backgroundColor: '#9e5f5f' }]}
-            onPress={() => {
-              toggleMenu();
-              setShowVaccineModal(true);
-            }}
-            activeOpacity={0.8}
+      {/* Floating action button with menu - Hide on completed and schedule tabs */}
+      {activeTab === 'upcoming' && (
+        <View style={styles.fabContainer}>
+          {/* Vaccination option */}
+          <Animated.View 
+            style={[
+              styles.fabOption,
+              { 
+                transform: [
+                  { translateY: vaccinationTranslateY },
+                  { scale: addButtonAnimation }
+                ] 
+              }
+            ]}
           >
-            <FontAwesome5 name="syringe" size={18} color="#FFFFFF" />
-          </TouchableOpacity>
-          <View style={styles.fabOptionLabel}>
-            <Text style={styles.fabOptionText}>Vaccination</Text>
-          </View>
-        </Animated.View>
-        
-        {/* Visits option */}
-        <Animated.View 
-          style={[
-            styles.fabOption,
-            { 
-              transform: [
-                { translateY: visitsTranslateY },
-                { scale: addButtonAnimation }
-              ] 
-            }
-          ]}
-        >
-          <TouchableOpacity 
-            style={[styles.fabOptionButton, { backgroundColor: '#5f819e' }]}
-            onPress={() => {
-              toggleMenu();
-              setShowVisitsModal(true);
-            }}
-            activeOpacity={0.8}
+            <TouchableOpacity 
+              style={[styles.fabOptionButton, { backgroundColor: '#9e5f5f' }]}
+              onPress={() => {
+                toggleMenu();
+                setShowVaccineModal(true);
+              }}
+              activeOpacity={0.8}
+            >
+              <FontAwesome5 name="syringe" size={18} color="#FFFFFF" />
+            </TouchableOpacity>
+            <View style={styles.fabOptionLabel}>
+              <Text style={styles.fabOptionText}>Vaccination</Text>
+            </View>
+          </Animated.View>
+          
+          {/* Visits option */}
+          <Animated.View 
+            style={[
+              styles.fabOption,
+              { 
+                transform: [
+                  { translateY: visitsTranslateY },
+                  { scale: addButtonAnimation }
+                ] 
+              }
+            ]}
           >
-            <FontAwesome5 name="hospital" size={18} color="#FFFFFF" />
-          </TouchableOpacity>
-          <View style={styles.fabOptionLabel}>
-            <Text style={styles.fabOptionText}>Visit</Text>
-          </View>
-        </Animated.View>
-        
-        {/* Main FAB button */}
-        <Animated.View 
-          style={[
-            styles.fab,
-            {
-              transform: [
-                { scale: fabScale }
-              ]
-            }
-          ]}
-        >
-          <TouchableOpacity
-            style={styles.fabButton}
-            onPress={toggleMenu}
-            activeOpacity={0.8}
+            <TouchableOpacity 
+              style={[styles.fabOptionButton, { backgroundColor: '#5f819e' }]}
+              onPress={() => {
+                toggleMenu();
+                setShowVisitsModal(true);
+              }}
+              activeOpacity={0.8}
+            >
+              <FontAwesome5 name="hospital" size={18} color="#FFFFFF" />
+            </TouchableOpacity>
+            <View style={styles.fabOptionLabel}>
+              <Text style={styles.fabOptionText}>Visit</Text>
+            </View>
+          </Animated.View>
+          
+          {/* Main FAB button */}
+          <Animated.View 
+            style={[
+              styles.fab,
+              {
+                transform: [
+                  { scale: fabScale }
+                ]
+              }
+            ]}
           >
-            <Animated.View style={{ transform: [{ rotate: rotateInterpolate }] }}>
-              <MaterialIcons name="add" size={28} color="#FFFFFF" />
-            </Animated.View>
-          </TouchableOpacity>
-        </Animated.View>
-      </View>
+            <TouchableOpacity
+              style={styles.fabButton}
+              onPress={toggleMenu}
+              activeOpacity={0.8}
+            >
+              <Animated.View style={{ transform: [{ rotate: rotateInterpolate }] }}>
+                <MaterialIcons name="add" size={28} color="#FFFFFF" />
+              </Animated.View>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      )}
       
       {/* Vaccination Modal */}
       <VaccineModal
@@ -715,7 +641,7 @@ const Vaccination = ({ route, navigation }) => {
         selectedDate={selectedDateObj}
       />
       
-      {/* Visits Modal - UPDATED TO INCLUDE onSave */}
+      {/* Visits Modal */}
       <VisitsModal
         visible={showVisitsModal}
         onClose={() => setShowVisitsModal(false)}
@@ -734,7 +660,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 90, // Extra padding for FAB
   },
-  // Header styles - Updated to match HomeStyles
+  // Header styles
   headerContainer: {
     width: '100%',
     backgroundColor: colors.primary,
@@ -837,24 +763,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   // Calendar styles
-  calendarContainer: {
-    backgroundColor: '#FFFFFF',
+  calendarSection: {
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 8,
+  },
+  calendarToggle: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    overflow: 'hidden',
+    marginBottom: 8,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
       },
       android: {
-        elevation: 4,
+        elevation: 2,
       },
     }),
+  },
+  calendarToggleContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+  },
+  calendarToggleText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '500',
+    color: colors.textDark,
+    marginLeft: 12,
   },
   // Vaccination list section styles
   sectionContainer: {
@@ -885,9 +825,6 @@ const styles = StyleSheet.create({
       },
     }),
   },
-  pastVaccinationCard: {
-    backgroundColor: '#F8F8F8',
-  },
   vaccinationHeader: {
     flexDirection: 'row',
     padding: 16,
@@ -901,9 +838,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
-  },
-  pastVaccinationIcon: {
-    backgroundColor: colors.success,
   },
   vaccinationHeaderContent: {
     flex: 1,
@@ -1054,6 +988,40 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '500',
+  },
+  //from here 
+  calendarSection: {
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  calendarToggle: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    marginBottom: 8,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  calendarToggleContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+  },
+  calendarToggleText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '500',
+    color: colors.textDark,
+    marginLeft: 12,
   },
 });
 

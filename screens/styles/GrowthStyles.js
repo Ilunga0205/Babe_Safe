@@ -80,27 +80,40 @@ const GrowthStyles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(0,0,0,0.15)',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 4, // Add horizontal padding
+  },
   tab: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
+    paddingVertical: 10, // Reduced from 12
+    paddingHorizontal: 4, // Reduced from 8
+    minHeight: 44, // Ensure minimum touch target
   },
   activeTab: {
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
+    marginHorizontal: 2, // Add small margin between active tabs
   },
   tabText: {
-    fontSize: 12,
+    fontSize: 10, // Reduced from 12
     fontWeight: '500',
     color: '#FFFFFF',
-    marginLeft: 5,
+    marginLeft: 4, // Reduced from 5
+    textAlign: 'center',
+    flexShrink: 1, // Allow text to shrink if needed
+    numberOfLines: 1, // Ensure single line
   },
   activeTabText: {
     color: colors.primary,
+    fontWeight: '600', // Slightly bolder for active state
   },
   // Existing Growth screen styles
   content: {

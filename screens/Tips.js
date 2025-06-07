@@ -331,26 +331,27 @@ const Tips = ({ navigation }) => {
           end={{ x: 1, y: 0 }}
           style={styles.headerGradient}
         >
-          <View style={styles.headerContent}>
-            <View style={styles.headerTitleContainer}>
-              <MaterialIcons name="lightbulb" size={22} color="#FFFFFF" />
-              <Text style={styles.headerTitle}>Expert Tips</Text>
-              <View style={styles.babyInfoContainer}>
-                <Text style={styles.babyInfoText}>
-                  for {babyInfo.name}, {babyInfo.age}
-                </Text>
-              </View>
-            </View>
-            
-            {/* Community button in header - This is the ONLY community button now */}
-            <TouchableOpacity 
-              style={styles.headerCommunityButton}
-              onPress={navigateToCommunity}
-            >
-              <FontAwesome5 name="users" size={14} color={colors.primary} />
-              <Text style={styles.headerCommunityText}>Community</Text>
-            </TouchableOpacity>
-          </View>
+         <View style={styles.headerContent}>
+  <View style={styles.headerTitleContainer}>
+    <View style={styles.headerTitleRow}>
+      <MaterialIcons name="lightbulb" size={22} color="#FFFFFF" />
+      <Text style={styles.headerTitle}>Expert Tips</Text>
+    </View>
+    <View style={styles.babyInfoContainer}>
+      <Text style={styles.babyInfoText}>
+        for {babyInfo.name}, {babyInfo.age}
+      </Text>
+    </View>
+  </View>
+  
+  <TouchableOpacity 
+    style={styles.headerCommunityButton}
+    onPress={navigateToCommunity}
+  >
+    <FontAwesome5 name="users" size={14} color={colors.primary} />
+    <Text style={styles.headerCommunityText}>Community</Text>
+  </TouchableOpacity>
+</View>
         </LinearGradient>
       </Animated.View>
 

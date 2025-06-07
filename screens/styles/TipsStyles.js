@@ -20,17 +20,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   headerContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    height: '100%',
-    paddingBottom: 10,
-  },
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  height: '100%',
+  paddingBottom: 10,
+  flex: 1,
+},
   headerTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexShrink: 1,
-  },
+  flexDirection: 'column', // Changed from 'row' to 'column'
+  alignItems: 'flex-start', // Changed from 'center' to 'flex-start'
+  flexShrink: 1,
+  flex: 1, // Add this to take available space
+},
+headerTitleRow: { // Add this new style
+  flexDirection: 'row',
+  alignItems: 'center',
+},
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
@@ -38,9 +44,9 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   babyInfoContainer: {
-    marginLeft: 8,
-    alignSelf: 'center',
-  },
+  marginLeft: 28, // Align with the title text (icon width + marginLeft)
+  alignSelf: 'flex-start',
+},
   babyInfoText: {
     fontSize: 14,
     fontWeight: '400',
@@ -56,7 +62,8 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 20,
-    marginLeft: 10,
+    // marginLeft: 10, // Remove this if it causes misalignment
+    alignSelf: 'flex-end', // Ensures it aligns to the end of its container
   },
   headerCommunityText: {
     fontSize: 12,
